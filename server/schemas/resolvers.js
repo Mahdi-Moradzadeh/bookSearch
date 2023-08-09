@@ -12,11 +12,17 @@ const resolvers = {
                 return userData;
             }
 
-            throw new AuthenticatonError('Please log in first');
+            throw new AuthenticatonError('Must log in first');
         }
     },
 
     Mutation: {
+        addUser: async (parent, args) => {
+            const user = await User.create(args);
+            const token = signToken(user);
+            return {token, user};
+        },
+
         login: async (parent, {email, password}) => {
             const user = await User.findOne({email});
 
@@ -30,12 +36,6 @@ const resolvers = {
                 throw new AuthenticatonError('Incorrect password');
             }
 
-            const token = signToken(user);
-            return {token, user};
-        },
-
-        addUser: async (parent, args) => {
-            const user = await User.create(args);
             const token = signToken(user);
             return {token, user};
         },
@@ -61,6 +61,7 @@ const resolvers = {
                     {new: true}
                 );
             }
+            return updatedUser;
             throw new AuthenticatonError('Please log in first');
         }
 }};
